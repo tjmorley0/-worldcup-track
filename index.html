@@ -2,19 +2,23 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>World Cup Sweepstake App</title>
+<title>Sweepstake Tracker</title>
+
+<!-- PWA META (this is what makes it feel like an app) -->
+<meta name="theme-color" content="#0a0f1e">
+<link rel="manifest" id="manifest-placeholder">
 
 <style>
 body {
   margin: 0;
-  font-family: system-ui, Arial;
+  font-family: system-ui, -apple-system, Arial;
   background: #0a0f1e;
   color: white;
 }
 
-/* HEADER */
-.header {
-  padding: 18px;
+/* TOP BAR */
+.topbar {
+  padding: 16px;
   background: linear-gradient(135deg,#1a2744,#0d1b3e);
   border-bottom: 2px solid #c8a84b;
 }
@@ -29,105 +33,93 @@ body {
   color: #8892a4;
 }
 
-/* CONTAINER */
+/* PAGE */
 .container {
-  padding: 15px;
+  padding: 14px;
   max-width: 500px;
   margin: auto;
 }
 
-/* CARD */
+/* CARDS */
 .card {
   background: #111827;
-  padding: 12px;
-  border-radius: 12px;
+  padding: 14px;
+  border-radius: 14px;
   margin-bottom: 10px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
 }
 
-/* LEADERBOARD */
-.leader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-  border-radius: 10px;
-  background: #0d1520;
-  margin-top: 8px;
-}
-
-.name {
-  font-weight: 600;
-}
-
-.pts {
-  color: #c8a84b;
-  font-weight: 800;
-}
-
-/* FORM */
+/* INPUTS */
 select, input {
   width: 100%;
   padding: 12px;
   margin: 6px 0;
-  border-radius: 8px;
+  border-radius: 10px;
   border: none;
   background: #0d1520;
   color: white;
 }
 
+/* BUTTON */
 button {
   width: 100%;
   padding: 12px;
   margin-top: 8px;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   background: #c8a84b;
   font-weight: 800;
-  cursor: pointer;
 }
 
-/* TABS */
-.tabs {
+/* LEADERBOARD */
+.row {
   display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
+  justify-content: space-between;
+  padding: 12px;
+  background: #0d1520;
+  border-radius: 12px;
+  margin-bottom: 8px;
 }
 
-.tab {
+/* BOTTOM NAV (APP FEEL) */
+.nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #0d1520;
+  display: flex;
+  border-top: 1px solid #1e2d4a;
+}
+
+.nav button {
   flex: 1;
-  padding: 10px;
-  text-align: center;
-  background: #111827;
-  border-radius: 8px;
+  background: none;
+  color: #8892a4;
   font-size: 12px;
-  cursor: pointer;
+  padding: 14px;
 }
 
-.active {
-  background: #c8a84b;
-  color: black;
+.nav button.active {
+  color: #c8a84b;
 }
 </style>
 </head>
 
 <body>
 
-<div class="header">
+<div class="topbar">
   <div class="title">🏆 Sweepstake Tracker</div>
-  <div class="subtitle">Mobile App Version (Offline Save)</div>
+  <div class="subtitle">Your private football league</div>
 </div>
 
 <div class="container">
 
-<div class="tabs">
-  <div class="tab active" onclick="showTab('add')">➕ Add Match</div>
-  <div class="tab" onclick="showTab('board')">🏆 Leaderboard</div>
-</div>
-
 <!-- ADD MATCH -->
-<div id="addTab">
+<div id="addPage">
 
   <div class="card">
+    <h3>Add Match</h3>
 
     <select id="home"></select>
     <select id="away"></select>
@@ -141,12 +133,18 @@ button {
 </div>
 
 <!-- LEADERBOARD -->
-<div id="boardTab" style="display:none">
+<div id="boardPage" style="display:none">
 
-  <div id="leaderboard"></div>
+  <div id="board"></div>
 
 </div>
 
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="nav">
+  <button class="active" onclick="show('add', this)">➕ Add</button>
+  <button onclick="show('board', this)">🏆 Board</button>
 </div>
 
 <script>
@@ -164,53 +162,48 @@ const PLAYERS = [
   { name:"Josh", teams:["Turkey","Norway","Curaçao","Ghana","Japan","Germany"] }
 ];
 
-let matches = JSON.parse(localStorage.getItem("matches")) || [];
+let matches = JSON.parse(localStorage.getItem("matches") || "[]");
 
-/* ---------------- INIT DROPDOWNS ---------------- */
+const allTeams = [...new Set(PLAYERS.flatMap(p=>p.teams))];
 
-const allTeams = [...new Set(PLAYERS.flatMap(p => p.teams))];
+/* ---------------- INIT SELECTS ---------------- */
 
-function fillSelects() {
+function init() {
   const home = document.getElementById("home");
   const away = document.getElementById("away");
 
-  home.innerHTML = "";
-  away.innerHTML = "";
-
-  allTeams.forEach(t => {
-    home.innerHTML += `<option value="${t}">${t}</option>`;
-    away.innerHTML += `<option value="${t}">${t}</option>`;
+  allTeams.forEach(t=>{
+    home.innerHTML += `<option>${t}</option>`;
+    away.innerHTML += `<option>${t}</option>`;
   });
+
+  render();
 }
+init();
 
-fillSelects();
+/* ---------------- SCORE SYSTEM ---------------- */
 
-/* ---------------- SCORING ---------------- */
+function empty(){ return {w:0,d:0}; }
 
-function empty() {
-  return { wins:0, draws:0 };
-}
-
-function points(s) {
-  return s.wins + s.draws * 0.5;
+function points(s){
+  return s.w + s.d*0.5;
 }
 
 /* ---------------- ADD MATCH ---------------- */
 
-function addMatch() {
+function addMatch(){
   const home = homeSel().value;
   const away = awaySel().value;
-  const hg = Number(document.getElementById("hg").value);
-  const ag = Number(document.getElementById("ag").value);
+  const hg = +document.getElementById("hg").value;
+  const ag = +document.getElementById("ag").value;
 
-  if (!home || !away || home === away) return alert("Pick valid teams");
+  if(home===away) return alert("Pick different teams");
 
-  matches.push({ home, away, hg, ag });
-
+  matches.push({home,away,hg,ag});
   localStorage.setItem("matches", JSON.stringify(matches));
 
-  document.getElementById("hg").value = "";
-  document.getElementById("ag").value = "";
+  document.getElementById("hg").value="";
+  document.getElementById("ag").value="";
 
   render();
 }
@@ -218,53 +211,51 @@ function addMatch() {
 function homeSel(){ return document.getElementById("home"); }
 function awaySel(){ return document.getElementById("away"); }
 
-/* ---------------- BUILD SCORES ---------------- */
+/* ---------------- BUILD ---------------- */
 
-function build() {
-  const teams = {};
-  allTeams.forEach(t => teams[t] = empty());
+function build(){
+  const t={};
+  allTeams.forEach(x=>t[x]=empty());
 
-  matches.forEach(m => {
-    if (m.hg > m.ag) teams[m.home].wins++;
-    else if (m.ag > m.hg) teams[m.away].wins++;
-    else {
-      teams[m.home].draws++;
-      teams[m.away].draws++;
+  matches.forEach(m=>{
+    if(m.hg>m.ag) t[m.home].w++;
+    else if(m.ag>m.hg) t[m.away].w++;
+    else{
+      t[m.home].d++;
+      t[m.away].d++;
     }
   });
 
-  return teams;
+  return t;
 }
 
 /* ---------------- RENDER ---------------- */
 
-function render() {
-  const teams = build();
+function render(){
+  const t = build();
 
-  const results = PLAYERS.map(p => {
-    const total = p.teams.reduce((s,t)=>s+points(teams[t]),0);
-    return { name:p.name, total };
+  const board = PLAYERS.map(p=>{
+    const total = p.teams.reduce((s,x)=>s+points(t[x]),0);
+    return {name:p.name,total};
   }).sort((a,b)=>b.total-a.total);
 
-  document.getElementById("leaderboard").innerHTML =
-    results.map((p,i)=>`
-      <div class="leader">
-        <div class="name">${i===0?"🏆 ":""}${p.name}</div>
-        <div class="pts">${p.total.toFixed(1)}</div>
+  document.getElementById("board").innerHTML =
+    board.map((p,i)=>`
+      <div class="row">
+        <div>${i===0?"🏆 ":""}${p.name}</div>
+        <div style="color:#c8a84b;font-weight:800">${p.total.toFixed(1)}</div>
       </div>
     `).join("");
 }
 
-render();
+/* ---------------- NAV ---------------- */
 
-/* ---------------- TABS ---------------- */
+function show(page, el){
+  document.getElementById("addPage").style.display = page==="add"?"block":"none";
+  document.getElementById("boardPage").style.display = page==="board"?"block":"none";
 
-function showTab(tab) {
-  document.getElementById("addTab").style.display = tab==="add"?"block":"none";
-  document.getElementById("boardTab").style.display = tab==="board"?"block":"none";
-
-  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-  event.target.classList.add("active");
+  document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
+  el.classList.add("active");
 }
 
 </script>
