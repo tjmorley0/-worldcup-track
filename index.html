@@ -2,29 +2,68 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>World Cup Sweepstake</title>
+  <title>World Cup Sweepstake PRO</title>
+
   <style>
-    body { font-family: Arial; background:#0a0f1e; color:white; padding:20px; }
-    .card { background:#111827; padding:15px; border-radius:10px; margin-bottom:10px; }
-    .title { font-size:18px; font-weight:bold; }
-    .pts { color:#c8a84b; font-size:16px; margin-top:5px; }
-    button { padding:10px 14px; border:none; border-radius:6px; background:#c8a84b; color:black; font-weight:bold; }
-    .small { font-size:12px; color:#8892a4; margin-top:10px; }
+    body {
+      font-family: Arial;
+      background: #0a0f1e;
+      color: white;
+      padding: 20px;
+    }
+
+    h2 { margin-bottom: 10px; }
+
+    button {
+      padding: 10px 14px;
+      border: none;
+      border-radius: 6px;
+      background: #c8a84b;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .card {
+      background: #111827;
+      padding: 14px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .name {
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .pts {
+      color: #c8a84b;
+      font-weight: bold;
+    }
+
+    .status {
+      margin: 10px 0;
+      font-size: 13px;
+      color: #8892a4;
+    }
   </style>
 </head>
 
 <body>
 
-<h2>🏆 World Cup Sweepstake Tracker</h2>
+<h2>🏆 World Cup Sweepstake PRO</h2>
 
-<button onclick="loadData()">🔄 Refresh Scores</button>
+<button onclick="loadData()">🔄 Refresh</button>
+<div class="status" id="status">Starting...</div>
 
-<p id="status">Starting...</p>
 <div id="app"></div>
 
 <script>
 
-/* ---------------- PLAYERS ---------------- */
+/* ---------------- PLAYERS (FULL 8) ---------------- */
 
 const PLAYERS = [
   { name: "Paul", teams: ["Canada","Iran","Australia","United States","France","Brazil"] },
@@ -51,7 +90,7 @@ function emptyStats() {
   };
 }
 
-/* ---------------- YOUR SCORING SYSTEM (UNCHANGED) ---------------- */
+/* ---------------- YOUR SCORING SYSTEM ---------------- */
 
 function calcPoints(s) {
   return (
@@ -65,36 +104,39 @@ function calcPoints(s) {
   );
 }
 
-/* ---------------- FREE WORKING API ---------------- */
+/* ---------------- REAL API (PRO STABLE SOURCE) ---------------- */
+/* Uses API-Football via public proxy endpoint */
 
 async function fetchMatches() {
-  const res = await fetch("https://www.thesportsdb.com/api/v1/json/3/eventsnextleague.php?id=4328");
+  const url =
+    "https://v3.football.api-sports.io/fixtures?season=2024";
+
+  const res = await fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent(url));
 
   if (!res.ok) {
-    throw new Error("Failed to fetch API");
+    throw new Error("API request failed");
   }
 
   const data = await res.json();
 
-  if (!data.events) {
-    throw new Error("No match data found");
+  if (!data.response) {
+    throw new Error("Invalid API response");
   }
 
-  // Convert API format → your format
-  return data.events.map(m => ({
-    status: m.strStatus === "Match Finished" ? "completed" : "upcoming",
+  return data.response.map(m => ({
+    status: m.fixture.status.short === "FT" ? "completed" : "upcoming",
     home_team: {
-      name: m.strHomeTeam,
-      goals: Number(m.intHomeScore || 0)
+      name: m.teams.home.name,
+      goals: m.goals.home ?? 0
     },
     away_team: {
-      name: m.strAwayTeam,
-      goals: Number(m.intAwayScore || 0)
+      name: m.teams.away.name,
+      goals: m.goals.away ?? 0
     }
   }));
 }
 
-/* ---------------- BUILD STATS ---------------- */
+/* ---------------- BUILD SCORES ---------------- */
 
 function buildStats(matches) {
   const teams = {};
@@ -124,7 +166,7 @@ function buildStats(matches) {
   return teams;
 }
 
-/* ---------------- MAIN APP ---------------- */
+/* ---------------- MAIN ---------------- */
 
 async function loadData() {
   const status = document.getElementById("status");
@@ -144,12 +186,14 @@ async function loadData() {
 
     app.innerHTML = results.map((p, i) => `
       <div class="card">
-        <div class="title">${i === 0 ? "🏆 " : ""}${p.name}</div>
+        <div class="name">
+          ${i === 0 ? "🏆 " : ""}${p.name}
+        </div>
         <div class="pts">${p.total.toFixed(1)} pts</div>
       </div>
     `).join("");
 
-    status.innerText = "Live scores loaded ✅";
+    status.innerText = "Live data updated ✅";
 
   } catch (err) {
     console.log(err);
