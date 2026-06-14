@@ -12,15 +12,20 @@
     .small { font-size:12px; color:#8892a4; margin-top:10px; }
   </style>
 </head>
+
 <body>
+
 <h2>🏆 World Cup Sweepstake Tracker</h2>
 
-🔄 Refresh Scores
+<button onclick="loadData()">🔄 Refresh Scores</button>
 
-<p id="status">Loading...</p>
+<p id="status">Starting...</p>
 <div id="app"></div>
+
 <script>
+
 /* ---------------- PLAYERS ---------------- */
+
 const PLAYERS = [
   { name: "Paul", teams: ["Canada","Iran","Australia","United States","France","Brazil"] },
   { name: "Joanne", teams: ["Sweden","Egypt","Jordan","Tunisia","Spain","Portugal"] },
@@ -31,7 +36,9 @@ const PLAYERS = [
   { name: "Tristan", teams: ["Argentina","Côte d'Ivoire","Haiti","Saudi Arabia","Senegal","Austria"] },
   { name: "Josh", teams: ["Turkey","Norway","Curaçao","Ghana","Japan","Germany"] }
 ];
+
 /* ---------------- STATS ---------------- */
+
 function emptyStats() {
   return {
     wins: 0,
@@ -43,6 +50,9 @@ function emptyStats() {
     champion: false
   };
 }
+
+/* ---------------- YOUR SCORING SYSTEM (UNCHANGED) ---------------- */
+
 function calcPoints(s) {
   return (
     s.wins * 1 +
@@ -54,30 +64,55 @@ function calcPoints(s) {
     (s.champion ? 12 : 0)
   );
 }
-/* ---------------- FETCH (CORS FIXED) ---------------- */
+
+/* ---------------- FREE WORKING API ---------------- */
+
 async function fetchMatches() {
-  const url = "https://api.allorigins.win/raw?url=" +
-              encodeURIComponent("https://worldcupjson.net/matches");
-  const res = await fetch(url);
+  const res = await fetch("https://www.thesportsdb.com/api/v1/json/3/eventsnextleague.php?id=4328");
+
   if (!res.ok) {
-    throw new Error("Failed to load match data");
+    throw new Error("Failed to fetch API");
   }
-  return await res.json();
+
+  const data = await res.json();
+
+  if (!data.events) {
+    throw new Error("No match data found");
+  }
+
+  // Convert API format → your format
+  return data.events.map(m => ({
+    status: m.strStatus === "Match Finished" ? "completed" : "upcoming",
+    home_team: {
+      name: m.strHomeTeam,
+      goals: Number(m.intHomeScore || 0)
+    },
+    away_team: {
+      name: m.strAwayTeam,
+      goals: Number(m.intAwayScore || 0)
+    }
+  }));
 }
-/* ---------------- CORE LOGIC ---------------- */
+
+/* ---------------- BUILD STATS ---------------- */
+
 function buildStats(matches) {
   const teams = {};
+
   PLAYERS.forEach(p => {
     p.teams.forEach(t => teams[t] = emptyStats());
   });
+
   matches.forEach(m => {
     if (m.status !== "completed") return;
+
     const home = m.home_team.name;
     const away = m.away_team.name;
     const hg = m.home_team.goals;
     const ag = m.away_team.goals;
+
     if (!teams[home] || !teams[away]) return;
-    // Win / draw logic
+
     if (hg > ag) teams[home].wins++;
     else if (ag > hg) teams[away].wins++;
     else {
@@ -85,33 +120,46 @@ function buildStats(matches) {
       teams[away].draws++;
     }
   });
+
   return teams;
 }
-/* ---------------- MAIN LOAD ---------------- */
+
+/* ---------------- MAIN APP ---------------- */
+
 async function loadData() {
   const status = document.getElementById("status");
   const app = document.getElementById("app");
-  status.innerText = "Loading live matches...";
+
+  status.innerText = "Loading live football data...";
+
   try {
     const matches = await fetchMatches();
+
     const teams = buildStats(matches);
+
     const results = PLAYERS.map(p => {
       const total = p.teams.reduce((sum, t) => sum + calcPoints(teams[t]), 0);
       return { name: p.name, total };
     }).sort((a, b) => b.total - a.total);
+
     app.innerHTML = results.map((p, i) => `
       <div class="card">
         <div class="title">${i === 0 ? "🏆 " : ""}${p.name}</div>
         <div class="pts">${p.total.toFixed(1)} pts</div>
       </div>
     `).join("");
+
     status.innerText = "Live scores loaded ✅";
+
   } catch (err) {
     console.log(err);
     status.innerText = "Error: " + err.message;
   }
 }
+
 loadData();
+
 </script>
+
 </body>
 </html>
