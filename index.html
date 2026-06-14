@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>World Cup Tracker</title>
+  <style>
+    body { font-family: Arial; background:#0a0f1e; color:white; padding:20px; }
+    .card { background:#111827; padding:15px; border-radius:10px; margin-bottom:10px; }
+    .title { font-size:20px; font-weight:bold; }
+    .pts { color:#c8a84b; font-size:18px; }
+    button { padding:10px; border:none; border-radius:6px; background:#c8a84b; color:black; }
+  </style>
+</head>
+<body>
+<h2>🏆 World Cup Sweepstake</h2>
+<button onclick="loadData()">Refresh Scores</button>
+<p id="status">Loading...</p>
+<div id="app"></div>
+<script>
+const PLAYERS = [
+  { name: "Tristan", teams: ["Argentina","Senegal","Austria","Saudi Arabia","Haiti","Côte d'Ivoire"] },
+  { name: "Josh", teams: ["Germany","Japan","Turkey","Ghana","Norway","Curaçao"] }
+];
+function emptyStats() {
+  return { wins:0, draws:0, roundOf16:false, quarterFinal:false, semiFinal:false, final:false, champion:false };
+}
+function calcPoints(s) {
+  return s.wins + s.draws*0.5 +
+    (s.roundOf16?2:0) +
+    (s.quarterFinal?4:0) +
+    (s.semiFinal?6:0) +
+    (s.final?8:0) +
+    (s.champion?12:0);
+}
+async function loadData() {
+  document.getElementById("status").innerText = "Loading real matches...";
+  try {
+    const res = await fetch("https://worldcupjson.net/matches");
+    const matches = await res.json();
+    const teams = {};
+    PLAYERS.forEach(p => p.teams.forEach(t => teams[t] = emptyStats()));
+    matches.forEach(m => {
+      if (m.status !== "completed") return;
+      const home = m.home_team.name;
+      const away = m.away_team.name;
+      const hg = m.home_team.goals;
+      const ag = m.away_team.goals;
+      if (!teams[home] || !teams[away]) return;
+      if (hg > ag) teams[home].wins++;
+      else if (ag > hg) teams[away].wins++;
+      else {
+        teams[home].draws++;
+        teams[away].draws++;
+      }
+    });
+    const results = PLAYERS.map(p => {
+      const total = p.teams.reduce((sum,t)=>sum+calcPoints(teams[t]),0);
+      return { name:p.name, total };
+    }).sort((a,b)=>b.total-a.total);
+    document.getElementById("app").innerHTML =
+      results.map(p=>`
+        <div class="card">
+          <div class="title">${p.name}</div>
+          <div class="pts">${p.total} pts</div>
+        </div>
+      `).join("");
+    document.getElementById("status").innerText = "Live scores loaded ✅";
+  } catch (e) {
+    document.getElementById("status").innerText = "Error loading data";
+  }
+}
+loadData();
+</script>
+</body>
+</html>
