@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sweepstake Tracker Pro</title>
+<title>Sweepstake FIFA Mode</title>
 
 <meta name="theme-color" content="#0a0f1e">
 <link rel="manifest" href="manifest.json">
@@ -10,98 +10,126 @@
 <style>
 body {
   margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,system-ui;
-  background:#0a0f1e;
+  font-family: system-ui, -apple-system, Arial;
+  background:#070b16;
   color:white;
 }
 
-/* HEADER */
+/* TOP HEADER (FIFA STYLE) */
 .header {
   padding:18px;
-  background:linear-gradient(135deg,#1a2744,#0d1b3e);
+  background:linear-gradient(135deg,#111c33,#070b16);
   border-bottom:2px solid #c8a84b;
 }
 
-.title { font-size:18px; font-weight:800; }
-.sub { font-size:12px; color:#8892a4; }
+.title {
+  font-size:20px;
+  font-weight:900;
+  letter-spacing:1px;
+}
 
-/* MAIN */
+.sub {
+  font-size:12px;
+  color:#8a93a6;
+}
+
+/* MAIN GRID FEEL */
 .container {
   padding:14px;
   max-width:520px;
   margin:auto;
-  padding-bottom:80px;
+  padding-bottom:90px;
 }
 
-/* CARDS */
-.card {
-  background:#111827;
-  border-radius:14px;
+/* FIFA MENU CARDS */
+.menuCard {
+  background: linear-gradient(135deg,#111827,#0d1520);
+  border:1px solid #1f2a44;
+  border-radius:16px;
   padding:14px;
-  margin-bottom:10px;
-  box-shadow:0 8px 25px rgba(0,0,0,0.25);
-  transform:translateY(0);
+  margin-bottom:12px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.4);
+  transform:scale(1);
   transition:0.2s;
 }
 
-.card:active {
-  transform:scale(0.98);
+.menuCard:active {
+  transform:scale(0.97);
+  border-color:#c8a84b;
 }
 
-/* LEADERBOARD */
-.row {
+/* LEADERBOARD CARD */
+.player {
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:12px;
+  padding:14px;
   background:#0d1520;
-  border-radius:12px;
+  border-radius:14px;
   margin-bottom:8px;
-  animation:fadeIn 0.3s ease;
+  border:1px solid #1e2d4a;
+  transition:0.2s;
 }
 
-@keyframes fadeIn {
-  from {opacity:0; transform:translateY(10px);}
-  to {opacity:1; transform:translateY(0);}
+.player:active {
+  transform:scale(0.98);
+  border-color:#c8a84b;
 }
 
-/* INPUTS */
+.name {
+  font-weight:700;
+}
+
+.score {
+  font-size:18px;
+  font-weight:900;
+  color:#c8a84b;
+}
+
+/* SELECTS */
 select,input {
   width:100%;
-  padding:12px;
+  padding:14px;
   margin:6px 0;
-  border-radius:10px;
+  border-radius:12px;
   border:none;
-  background:#0d1520;
+  background:#0b1220;
   color:white;
+  outline:none;
 }
 
-/* BUTTON */
+/* FIFA BUTTON */
 button {
   width:100%;
-  padding:12px;
+  padding:14px;
   border:none;
-  border-radius:10px;
-  background:#c8a84b;
-  font-weight:800;
+  border-radius:12px;
+  background:linear-gradient(135deg,#c8a84b,#b08d2e);
+  font-weight:900;
+  color:#0a0f1e;
   cursor:pointer;
+  transition:0.2s;
 }
 
-/* NAV */
+button:active {
+  transform:scale(0.97);
+}
+
+/* BOTTOM NAV */
 .nav {
   position:fixed;
   bottom:0;
   left:0;
   right:0;
   display:flex;
-  background:#0d1520;
-  border-top:1px solid #1e2d4a;
+  background:#0b1220;
+  border-top:1px solid #1f2a44;
 }
 
 .nav button {
   flex:1;
   background:none;
-  color:#8892a4;
+  color:#7f8aa3;
   font-size:12px;
   padding:14px;
 }
@@ -109,23 +137,33 @@ button {
 .nav .active {
   color:#c8a84b;
 }
+
+/* SMALL ANIMATION */
+.fade {
+  animation:fade 0.3s ease;
+}
+
+@keyframes fade {
+  from {opacity:0; transform:translateY(10px);}
+  to {opacity:1; transform:translateY(0);}
+}
 </style>
 </head>
 
 <body>
 
 <div class="header">
-  <div class="title">🏆 Sweepstake Tracker</div>
-  <div class="sub">Final Boss Edition • Offline Ready</div>
+  <div class="title">🏆 S W E E P S T A K E</div>
+  <div class="sub">FIFA Career Mode • Player League</div>
 </div>
 
 <div class="container">
 
-<!-- ADD -->
-<div id="addPage">
+<!-- ADD MATCH -->
+<div id="addPage" class="fade">
 
-  <div class="card">
-    <h3>Add Match Result</h3>
+  <div class="menuCard">
+    <h3>⚽ Add Match Result</h3>
 
     <select id="home"></select>
     <select id="away"></select>
@@ -133,13 +171,13 @@ button {
     <input id="hg" type="number" placeholder="Home goals">
     <input id="ag" type="number" placeholder="Away goals">
 
-    <button onclick="addMatch()">Save Result</button>
+    <button onclick="addMatch()">SAVE RESULT</button>
   </div>
 
 </div>
 
-<!-- BOARD -->
-<div id="boardPage" style="display:none">
+<!-- LEADERBOARD -->
+<div id="boardPage" style="display:none" class="fade">
   <div id="board"></div>
 </div>
 
@@ -147,8 +185,8 @@ button {
 
 <!-- NAV -->
 <div class="nav">
-  <button class="active" onclick="nav('add',this)">➕ Add</button>
-  <button onclick="nav('board',this)">🏆 Board</button>
+  <button class="active" onclick="nav('add',this)">➕ HOME</button>
+  <button onclick="nav('board',this)">🏆 STANDINGS</button>
 </div>
 
 <script>
@@ -167,7 +205,6 @@ const PLAYERS=[
 ];
 
 let matches=JSON.parse(localStorage.getItem("matches")||"[]");
-
 const allTeams=[...new Set(PLAYERS.flatMap(p=>p.teams))];
 
 /* ---------------- INIT ---------------- */
@@ -230,7 +267,7 @@ function build(){
   return t;
 }
 
-/* ---------------- RENDER ---------------- */
+/* ---------------- RENDER (FIFA STYLE) ---------------- */
 
 function render(){
   const t=build();
@@ -242,9 +279,9 @@ function render(){
 
   document.getElementById("board").innerHTML=
     board.map((p,i)=>`
-      <div class="row">
-        <div>${i===0?"🏆 ":""}${p.name}</div>
-        <div style="color:#c8a84b;font-weight:800">${p.total.toFixed(1)}</div>
+      <div class="player">
+        <div class="name">${i===0?"🏆 ":""}${p.name}</div>
+        <div class="score">${p.total.toFixed(1)}</div>
       </div>
     `).join("");
 }
