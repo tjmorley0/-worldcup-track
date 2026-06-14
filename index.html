@@ -2,124 +2,130 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sweepstake Tracker</title>
+<title>Sweepstake Tracker Pro</title>
 
-<!-- PWA META (this is what makes it feel like an app) -->
 <meta name="theme-color" content="#0a0f1e">
-<link rel="manifest" id="manifest-placeholder">
+<link rel="manifest" href="manifest.json">
 
 <style>
 body {
-  margin: 0;
-  font-family: system-ui, -apple-system, Arial;
-  background: #0a0f1e;
-  color: white;
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,system-ui;
+  background:#0a0f1e;
+  color:white;
 }
 
-/* TOP BAR */
-.topbar {
-  padding: 16px;
-  background: linear-gradient(135deg,#1a2744,#0d1b3e);
-  border-bottom: 2px solid #c8a84b;
+/* HEADER */
+.header {
+  padding:18px;
+  background:linear-gradient(135deg,#1a2744,#0d1b3e);
+  border-bottom:2px solid #c8a84b;
 }
 
-.title {
-  font-size: 18px;
-  font-weight: 800;
-}
+.title { font-size:18px; font-weight:800; }
+.sub { font-size:12px; color:#8892a4; }
 
-.subtitle {
-  font-size: 12px;
-  color: #8892a4;
-}
-
-/* PAGE */
+/* MAIN */
 .container {
-  padding: 14px;
-  max-width: 500px;
-  margin: auto;
+  padding:14px;
+  max-width:520px;
+  margin:auto;
+  padding-bottom:80px;
 }
 
 /* CARDS */
 .card {
-  background: #111827;
-  padding: 14px;
-  border-radius: 14px;
-  margin-bottom: 10px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  background:#111827;
+  border-radius:14px;
+  padding:14px;
+  margin-bottom:10px;
+  box-shadow:0 8px 25px rgba(0,0,0,0.25);
+  transform:translateY(0);
+  transition:0.2s;
 }
 
-/* INPUTS */
-select, input {
-  width: 100%;
-  padding: 12px;
-  margin: 6px 0;
-  border-radius: 10px;
-  border: none;
-  background: #0d1520;
-  color: white;
-}
-
-/* BUTTON */
-button {
-  width: 100%;
-  padding: 12px;
-  margin-top: 8px;
-  border: none;
-  border-radius: 10px;
-  background: #c8a84b;
-  font-weight: 800;
+.card:active {
+  transform:scale(0.98);
 }
 
 /* LEADERBOARD */
 .row {
-  display: flex;
-  justify-content: space-between;
-  padding: 12px;
-  background: #0d1520;
-  border-radius: 12px;
-  margin-bottom: 8px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px;
+  background:#0d1520;
+  border-radius:12px;
+  margin-bottom:8px;
+  animation:fadeIn 0.3s ease;
 }
 
-/* BOTTOM NAV (APP FEEL) */
+@keyframes fadeIn {
+  from {opacity:0; transform:translateY(10px);}
+  to {opacity:1; transform:translateY(0);}
+}
+
+/* INPUTS */
+select,input {
+  width:100%;
+  padding:12px;
+  margin:6px 0;
+  border-radius:10px;
+  border:none;
+  background:#0d1520;
+  color:white;
+}
+
+/* BUTTON */
+button {
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  background:#c8a84b;
+  font-weight:800;
+  cursor:pointer;
+}
+
+/* NAV */
 .nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: #0d1520;
-  display: flex;
-  border-top: 1px solid #1e2d4a;
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  display:flex;
+  background:#0d1520;
+  border-top:1px solid #1e2d4a;
 }
 
 .nav button {
-  flex: 1;
-  background: none;
-  color: #8892a4;
-  font-size: 12px;
-  padding: 14px;
+  flex:1;
+  background:none;
+  color:#8892a4;
+  font-size:12px;
+  padding:14px;
 }
 
-.nav button.active {
-  color: #c8a84b;
+.nav .active {
+  color:#c8a84b;
 }
 </style>
 </head>
 
 <body>
 
-<div class="topbar">
+<div class="header">
   <div class="title">🏆 Sweepstake Tracker</div>
-  <div class="subtitle">Your private football league</div>
+  <div class="sub">Final Boss Edition • Offline Ready</div>
 </div>
 
 <div class="container">
 
-<!-- ADD MATCH -->
+<!-- ADD -->
 <div id="addPage">
 
   <div class="card">
-    <h3>Add Match</h3>
+    <h3>Add Match Result</h3>
 
     <select id="home"></select>
     <select id="away"></select>
@@ -132,75 +138,70 @@ button {
 
 </div>
 
-<!-- LEADERBOARD -->
+<!-- BOARD -->
 <div id="boardPage" style="display:none">
-
   <div id="board"></div>
-
 </div>
 
 </div>
 
-<!-- BOTTOM NAV -->
+<!-- NAV -->
 <div class="nav">
-  <button class="active" onclick="show('add', this)">➕ Add</button>
-  <button onclick="show('board', this)">🏆 Board</button>
+  <button class="active" onclick="nav('add',this)">➕ Add</button>
+  <button onclick="nav('board',this)">🏆 Board</button>
 </div>
 
 <script>
 
 /* ---------------- PLAYERS ---------------- */
 
-const PLAYERS = [
-  { name:"Paul", teams:["Canada","Iran","Australia","United States","France","Brazil"] },
-  { name:"Joanne", teams:["Sweden","Egypt","Jordan","Tunisia","Spain","Portugal"] },
-  { name:"Cameron", teams:["Netherlands","Panama","Iraq","Uruguay","Belgium","Croatia"] },
-  { name:"Ashley", teams:["South Africa","England","Algeria","Cape Verde Islands","Paraguay","Czech Republic"] },
-  { name:"Jessica", teams:["Bosnia and Herzegovina","Switzerland","Congo DR","Mexico","New Zealand","Colombia"] },
-  { name:"Evie", teams:["Ecuador","Morocco","Qatar","Uzbekistan","Scotland","Korea Republic"] },
-  { name:"Tristan", teams:["Argentina","Côte d'Ivoire","Haiti","Saudi Arabia","Senegal","Austria"] },
-  { name:"Josh", teams:["Turkey","Norway","Curaçao","Ghana","Japan","Germany"] }
+const PLAYERS=[
+  {name:"Paul",teams:["Canada","Iran","Australia","United States","France","Brazil"]},
+  {name:"Joanne",teams:["Sweden","Egypt","Jordan","Tunisia","Spain","Portugal"]},
+  {name:"Cameron",teams:["Netherlands","Panama","Iraq","Uruguay","Belgium","Croatia"]},
+  {name:"Ashley",teams:["South Africa","England","Algeria","Cape Verde Islands","Paraguay","Czech Republic"]},
+  {name:"Jessica",teams:["Bosnia and Herzegovina","Switzerland","Congo DR","Mexico","New Zealand","Colombia"]},
+  {name:"Evie",teams:["Ecuador","Morocco","Qatar","Uzbekistan","Scotland","Korea Republic"]},
+  {name:"Tristan",teams:["Argentina","Côte d'Ivoire","Haiti","Saudi Arabia","Senegal","Austria"]},
+  {name:"Josh",teams:["Turkey","Norway","Curaçao","Ghana","Japan","Germany"]}
 ];
 
-let matches = JSON.parse(localStorage.getItem("matches") || "[]");
+let matches=JSON.parse(localStorage.getItem("matches")||"[]");
 
-const allTeams = [...new Set(PLAYERS.flatMap(p=>p.teams))];
+const allTeams=[...new Set(PLAYERS.flatMap(p=>p.teams))];
 
-/* ---------------- INIT SELECTS ---------------- */
+/* ---------------- INIT ---------------- */
 
-function init() {
-  const home = document.getElementById("home");
-  const away = document.getElementById("away");
+function init(){
+  const h=document.getElementById("home");
+  const a=document.getElementById("away");
 
   allTeams.forEach(t=>{
-    home.innerHTML += `<option>${t}</option>`;
-    away.innerHTML += `<option>${t}</option>`;
+    h.innerHTML+=`<option>${t}</option>`;
+    a.innerHTML+=`<option>${t}</option>`;
   });
 
   render();
 }
 init();
 
-/* ---------------- SCORE SYSTEM ---------------- */
+/* ---------------- SCORE ---------------- */
 
-function empty(){ return {w:0,d:0}; }
-
-function points(s){
-  return s.w + s.d*0.5;
-}
+function empty(){return{w:0,d:0};}
+function pts(s){return s.w+s.d*0.5;}
 
 /* ---------------- ADD MATCH ---------------- */
 
 function addMatch(){
-  const home = homeSel().value;
-  const away = awaySel().value;
-  const hg = +document.getElementById("hg").value;
-  const ag = +document.getElementById("ag").value;
+  const home=homeSel().value;
+  const away=awaySel().value;
+  const hg=+document.getElementById("hg").value;
+  const ag=+document.getElementById("ag").value;
 
   if(home===away) return alert("Pick different teams");
 
   matches.push({home,away,hg,ag});
-  localStorage.setItem("matches", JSON.stringify(matches));
+  localStorage.setItem("matches",JSON.stringify(matches));
 
   document.getElementById("hg").value="";
   document.getElementById("ag").value="";
@@ -208,8 +209,8 @@ function addMatch(){
   render();
 }
 
-function homeSel(){ return document.getElementById("home"); }
-function awaySel(){ return document.getElementById("away"); }
+function homeSel(){return document.getElementById("home");}
+function awaySel(){return document.getElementById("away");}
 
 /* ---------------- BUILD ---------------- */
 
@@ -232,14 +233,14 @@ function build(){
 /* ---------------- RENDER ---------------- */
 
 function render(){
-  const t = build();
+  const t=build();
 
-  const board = PLAYERS.map(p=>{
-    const total = p.teams.reduce((s,x)=>s+points(t[x]),0);
-    return {name:p.name,total};
+  const board=PLAYERS.map(p=>{
+    const total=p.teams.reduce((s,x)=>s+pts(t[x]),0);
+    return{name:p.name,total};
   }).sort((a,b)=>b.total-a.total);
 
-  document.getElementById("board").innerHTML =
+  document.getElementById("board").innerHTML=
     board.map((p,i)=>`
       <div class="row">
         <div>${i===0?"🏆 ":""}${p.name}</div>
@@ -250,9 +251,9 @@ function render(){
 
 /* ---------------- NAV ---------------- */
 
-function show(page, el){
-  document.getElementById("addPage").style.display = page==="add"?"block":"none";
-  document.getElementById("boardPage").style.display = page==="board"?"block":"none";
+function nav(page,el){
+  document.getElementById("addPage").style.display=page==="add"?"block":"none";
+  document.getElementById("boardPage").style.display=page==="board"?"block":"none";
 
   document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
   el.classList.add("active");
