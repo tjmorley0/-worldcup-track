@@ -1,0 +1,9 @@
+{
+  "name": "Sweepstake Tracker",
+  "short_name": "Sweepstake",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0a0f1e",
+  "theme_color": "#0a0f1e",
+  "icons": []
+}
