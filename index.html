@@ -1,142 +1,230 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>World Cup Sweepstake Manual</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>World Cup Sweepstake App</title>
 
-  <style>
-    body {
-      font-family: Arial;
-      background: #0a0f1e;
-      color: white;
-      padding: 20px;
-    }
+<style>
+body {
+  margin: 0;
+  font-family: system-ui, Arial;
+  background: #0a0f1e;
+  color: white;
+}
 
-    h2 { margin-bottom: 10px; }
+/* HEADER */
+.header {
+  padding: 18px;
+  background: linear-gradient(135deg,#1a2744,#0d1b3e);
+  border-bottom: 2px solid #c8a84b;
+}
 
-    input, select, button {
-      padding: 10px;
-      margin: 5px 0;
-      border-radius: 6px;
-      border: none;
-      width: 100%;
-    }
+.title {
+  font-size: 18px;
+  font-weight: 800;
+}
 
-    button {
-      background: #c8a84b;
-      font-weight: bold;
-      cursor: pointer;
-    }
+.subtitle {
+  font-size: 12px;
+  color: #8892a4;
+}
 
-    .card {
-      background: #111827;
-      padding: 12px;
-      border-radius: 10px;
-      margin-top: 10px;
-    }
+/* CONTAINER */
+.container {
+  padding: 15px;
+  max-width: 500px;
+  margin: auto;
+}
 
-    .row {
-      display: flex;
-      gap: 10px;
-    }
+/* CARD */
+.card {
+  background: #111827;
+  padding: 12px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
 
-    .team {
-      flex: 1;
-    }
+/* LEADERBOARD */
+.leader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-radius: 10px;
+  background: #0d1520;
+  margin-top: 8px;
+}
 
-    .pts {
-      color: #c8a84b;
-      font-weight: bold;
-    }
-  </style>
+.name {
+  font-weight: 600;
+}
+
+.pts {
+  color: #c8a84b;
+  font-weight: 800;
+}
+
+/* FORM */
+select, input {
+  width: 100%;
+  padding: 12px;
+  margin: 6px 0;
+  border-radius: 8px;
+  border: none;
+  background: #0d1520;
+  color: white;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  border: none;
+  border-radius: 8px;
+  background: #c8a84b;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* TABS */
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.tab {
+  flex: 1;
+  padding: 10px;
+  text-align: center;
+  background: #111827;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.active {
+  background: #c8a84b;
+  color: black;
+}
+</style>
 </head>
 
 <body>
 
-<h2>🏆 Sweepstake Tracker (Manual)</h2>
-
-<p>Add match result → leaderboard updates instantly</p>
-
-<div class="card">
-  <h3>Add Match Result</h3>
-
-  <input id="home" placeholder="Home team (exact name)" />
-  <input id="away" placeholder="Away team (exact name)" />
-
-  <div class="row">
-    <input id="homeGoals" type="number" placeholder="Home goals" />
-    <input id="awayGoals" type="number" placeholder="Away goals" />
-  </div>
-
-  <button onclick="addMatch()">Add Result</button>
+<div class="header">
+  <div class="title">🏆 Sweepstake Tracker</div>
+  <div class="subtitle">Mobile App Version (Offline Save)</div>
 </div>
 
-<h3>Leaderboard</h3>
-<div id="leaderboard"></div>
+<div class="container">
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('add')">➕ Add Match</div>
+  <div class="tab" onclick="showTab('board')">🏆 Leaderboard</div>
+</div>
+
+<!-- ADD MATCH -->
+<div id="addTab">
+
+  <div class="card">
+
+    <select id="home"></select>
+    <select id="away"></select>
+
+    <input id="hg" type="number" placeholder="Home goals">
+    <input id="ag" type="number" placeholder="Away goals">
+
+    <button onclick="addMatch()">Save Result</button>
+  </div>
+
+</div>
+
+<!-- LEADERBOARD -->
+<div id="boardTab" style="display:none">
+
+  <div id="leaderboard"></div>
+
+</div>
+
+</div>
 
 <script>
 
 /* ---------------- PLAYERS ---------------- */
 
 const PLAYERS = [
-  { name: "Paul", teams: ["Canada","Iran","Australia","United States","France","Brazil"] },
-  { name: "Joanne", teams: ["Sweden","Egypt","Jordan","Tunisia","Spain","Portugal"] },
-  { name: "Cameron", teams: ["Netherlands","Panama","Iraq","Uruguay","Belgium","Croatia"] },
-  { name: "Ashley", teams: ["South Africa","England","Algeria","Cape Verde Islands","Paraguay","Czech Republic"] },
-  { name: "Jessica", teams: ["Bosnia and Herzegovina","Switzerland","Congo DR","Mexico","New Zealand","Colombia"] },
-  { name: "Evie", teams: ["Ecuador","Morocco","Qatar","Uzbekistan","Scotland","Korea Republic"] },
-  { name: "Tristan", teams: ["Argentina","Côte d'Ivoire","Haiti","Saudi Arabia","Senegal","Austria"] },
-  { name: "Josh", teams: ["Turkey","Norway","Curaçao","Ghana","Japan","Germany"] }
+  { name:"Paul", teams:["Canada","Iran","Australia","United States","France","Brazil"] },
+  { name:"Joanne", teams:["Sweden","Egypt","Jordan","Tunisia","Spain","Portugal"] },
+  { name:"Cameron", teams:["Netherlands","Panama","Iraq","Uruguay","Belgium","Croatia"] },
+  { name:"Ashley", teams:["South Africa","England","Algeria","Cape Verde Islands","Paraguay","Czech Republic"] },
+  { name:"Jessica", teams:["Bosnia and Herzegovina","Switzerland","Congo DR","Mexico","New Zealand","Colombia"] },
+  { name:"Evie", teams:["Ecuador","Morocco","Qatar","Uzbekistan","Scotland","Korea Republic"] },
+  { name:"Tristan", teams:["Argentina","Côte d'Ivoire","Haiti","Saudi Arabia","Senegal","Austria"] },
+  { name:"Josh", teams:["Turkey","Norway","Curaçao","Ghana","Japan","Germany"] }
 ];
-
-/* ---------------- STORAGE ---------------- */
 
 let matches = JSON.parse(localStorage.getItem("matches")) || [];
 
+/* ---------------- INIT DROPDOWNS ---------------- */
+
+const allTeams = [...new Set(PLAYERS.flatMap(p => p.teams))];
+
+function fillSelects() {
+  const home = document.getElementById("home");
+  const away = document.getElementById("away");
+
+  home.innerHTML = "";
+  away.innerHTML = "";
+
+  allTeams.forEach(t => {
+    home.innerHTML += `<option value="${t}">${t}</option>`;
+    away.innerHTML += `<option value="${t}">${t}</option>`;
+  });
+}
+
+fillSelects();
+
 /* ---------------- SCORING ---------------- */
 
-function emptyStats() {
+function empty() {
   return { wins:0, draws:0 };
 }
 
-function calcPoints(s) {
-  return s.wins * 1 + s.draws * 0.5;
+function points(s) {
+  return s.wins + s.draws * 0.5;
 }
 
 /* ---------------- ADD MATCH ---------------- */
 
 function addMatch() {
-  const home = document.getElementById("home").value.trim();
-  const away = document.getElementById("away").value.trim();
-  const hg = Number(document.getElementById("homeGoals").value);
-  const ag = Number(document.getElementById("awayGoals").value);
+  const home = homeSel().value;
+  const away = awaySel().value;
+  const hg = Number(document.getElementById("hg").value);
+  const ag = Number(document.getElementById("ag").value);
 
-  if (!home || !away || isNaN(hg) || isNaN(ag)) return alert("Fill all fields");
+  if (!home || !away || home === away) return alert("Pick valid teams");
 
   matches.push({ home, away, hg, ag });
 
   localStorage.setItem("matches", JSON.stringify(matches));
 
-  document.getElementById("home").value = "";
-  document.getElementById("away").value = "";
-  document.getElementById("homeGoals").value = "";
-  document.getElementById("awayGoals").value = "";
+  document.getElementById("hg").value = "";
+  document.getElementById("ag").value = "";
 
   render();
 }
 
+function homeSel(){ return document.getElementById("home"); }
+function awaySel(){ return document.getElementById("away"); }
+
 /* ---------------- BUILD SCORES ---------------- */
 
-function buildScores() {
+function build() {
   const teams = {};
-
-  PLAYERS.forEach(p => {
-    p.teams.forEach(t => teams[t] = emptyStats());
-  });
+  allTeams.forEach(t => teams[t] = empty());
 
   matches.forEach(m => {
-    if (!teams[m.home] || !teams[m.away]) return;
-
     if (m.hg > m.ag) teams[m.home].wins++;
     else if (m.ag > m.hg) teams[m.away].wins++;
     else {
@@ -151,25 +239,33 @@ function buildScores() {
 /* ---------------- RENDER ---------------- */
 
 function render() {
-  const teams = buildScores();
+  const teams = build();
 
   const results = PLAYERS.map(p => {
-    const total = p.teams.reduce((sum, t) => sum + calcPoints(teams[t]), 0);
-    return { name: p.name, total };
-  }).sort((a,b) => b.total - a.total);
+    const total = p.teams.reduce((s,t)=>s+points(teams[t]),0);
+    return { name:p.name, total };
+  }).sort((a,b)=>b.total-a.total);
 
   document.getElementById("leaderboard").innerHTML =
-    results.map((p, i) => `
-      <div class="card">
-        <div>
-          ${i === 0 ? "🏆 " : ""}${p.name}
-        </div>
-        <div class="pts">${p.total.toFixed(1)} pts</div>
+    results.map((p,i)=>`
+      <div class="leader">
+        <div class="name">${i===0?"🏆 ":""}${p.name}</div>
+        <div class="pts">${p.total.toFixed(1)}</div>
       </div>
     `).join("");
 }
 
 render();
+
+/* ---------------- TABS ---------------- */
+
+function showTab(tab) {
+  document.getElementById("addTab").style.display = tab==="add"?"block":"none";
+  document.getElementById("boardTab").style.display = tab==="board"?"block":"none";
+
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  event.target.classList.add("active");
+}
 
 </script>
 
