@@ -2,131 +2,92 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sweepstake FIFA Mode</title>
-
-<meta name="theme-color" content="#0a0f1e">
-<link rel="manifest" href="manifest.json">
+<title>Sweepstake Tracker FIFA</title>
 
 <style>
-body {
+body{
   margin:0;
-  font-family: system-ui, -apple-system, Arial;
+  font-family:system-ui,-apple-system,Arial;
   background:#070b16;
   color:white;
 }
 
-/* TOP HEADER (FIFA STYLE) */
-.header {
+/* HEADER */
+.header{
   padding:18px;
   background:linear-gradient(135deg,#111c33,#070b16);
   border-bottom:2px solid #c8a84b;
 }
+.title{font-size:20px;font-weight:900;}
+.sub{font-size:12px;color:#8a93a6;}
 
-.title {
-  font-size:20px;
-  font-weight:900;
-  letter-spacing:1px;
-}
-
-.sub {
-  font-size:12px;
-  color:#8a93a6;
-}
-
-/* MAIN GRID FEEL */
-.container {
+/* LAYOUT */
+.container{
   padding:14px;
   max-width:520px;
   margin:auto;
   padding-bottom:90px;
 }
 
-/* FIFA MENU CARDS */
-.menuCard {
-  background: linear-gradient(135deg,#111827,#0d1520);
-  border:1px solid #1f2a44;
-  border-radius:16px;
+/* CARD */
+.card{
+  background:#111827;
+  border-radius:14px;
   padding:14px;
-  margin-bottom:12px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.4);
-  transform:scale(1);
-  transition:0.2s;
+  margin-bottom:10px;
 }
 
-.menuCard:active {
-  transform:scale(0.97);
-  border-color:#c8a84b;
-}
-
-/* LEADERBOARD CARD */
-.player {
+/* PLAYER ROW */
+.row{
   display:flex;
   justify-content:space-between;
-  align-items:center;
-  padding:14px;
+  padding:12px;
   background:#0d1520;
-  border-radius:14px;
-  margin-bottom:8px;
-  border:1px solid #1e2d4a;
-  transition:0.2s;
-}
-
-.player:active {
-  transform:scale(0.98);
-  border-color:#c8a84b;
-}
-
-.name {
-  font-weight:700;
-}
-
-.score {
-  font-size:18px;
-  font-weight:900;
-  color:#c8a84b;
-}
-
-/* SELECTS */
-select,input {
-  width:100%;
-  padding:14px;
-  margin:6px 0;
   border-radius:12px;
+  margin-bottom:8px;
+}
+
+/* INPUTS */
+select,input{
+  width:100%;
+  padding:12px;
+  margin:6px 0;
+  border-radius:10px;
   border:none;
   background:#0b1220;
   color:white;
-  outline:none;
 }
 
-/* FIFA BUTTON */
-button {
+/* BUTTON */
+button{
   width:100%;
-  padding:14px;
+  padding:12px;
   border:none;
-  border-radius:12px;
-  background:linear-gradient(135deg,#c8a84b,#b08d2e);
+  border-radius:10px;
+  background:#c8a84b;
   font-weight:900;
-  color:#0a0f1e;
   cursor:pointer;
-  transition:0.2s;
 }
 
-button:active {
-  transform:scale(0.97);
+/* SECONDARY BUTTON */
+.secondary{
+  background:#3a4a5a;
+  color:white;
+  margin-top:6px;
 }
 
-/* BOTTOM NAV */
-.nav {
+/* NAV */
+.nav{
   position:fixed;
   bottom:0;
   left:0;
   right:0;
   display:flex;
   background:#0b1220;
-  border-top:1px solid #1f2a44;
+  border-top:1px solid #1e2d4a;
 }
 
-.nav button {
+.nav button{
   flex:1;
   background:none;
   color:#7f8aa3;
@@ -134,18 +95,8 @@ button:active {
   padding:14px;
 }
 
-.nav .active {
+.nav .active{
   color:#c8a84b;
-}
-
-/* SMALL ANIMATION */
-.fade {
-  animation:fade 0.3s ease;
-}
-
-@keyframes fade {
-  from {opacity:0; transform:translateY(10px);}
-  to {opacity:1; transform:translateY(0);}
 }
 </style>
 </head>
@@ -153,17 +104,17 @@ button:active {
 <body>
 
 <div class="header">
-  <div class="title">🏆 S W E E P S T A K E</div>
-  <div class="sub">FIFA Career Mode • Player League</div>
+  <div class="title">🏆 Sweepstake Tracker</div>
+  <div class="sub">Final FIFA Mode • Full Control</div>
 </div>
 
 <div class="container">
 
-<!-- ADD MATCH -->
-<div id="addPage" class="fade">
+<!-- ADD PAGE -->
+<div id="addPage">
 
-  <div class="menuCard">
-    <h3>⚽ Add Match Result</h3>
+  <div class="card">
+    <h3>⚽ Add Match</h3>
 
     <select id="home"></select>
     <select id="away"></select>
@@ -171,13 +122,14 @@ button:active {
     <input id="hg" type="number" placeholder="Home goals">
     <input id="ag" type="number" placeholder="Away goals">
 
-    <button onclick="addMatch()">SAVE RESULT</button>
+    <button onclick="addMatch()">Save Result</button>
+    <button class="secondary" onclick="undoLast()">↩️ Undo Last</button>
   </div>
 
 </div>
 
-<!-- LEADERBOARD -->
-<div id="boardPage" style="display:none" class="fade">
+<!-- BOARD -->
+<div id="boardPage" style="display:none">
   <div id="board"></div>
 </div>
 
@@ -185,8 +137,8 @@ button:active {
 
 <!-- NAV -->
 <div class="nav">
-  <button class="active" onclick="nav('add',this)">➕ HOME</button>
-  <button onclick="nav('board',this)">🏆 STANDINGS</button>
+  <button class="active" onclick="nav('add',this)">➕ Add</button>
+  <button onclick="nav('board',this)">🏆 Board</button>
 </div>
 
 <script>
@@ -205,6 +157,8 @@ const PLAYERS=[
 ];
 
 let matches=JSON.parse(localStorage.getItem("matches")||"[]");
+let history=[];
+
 const allTeams=[...new Set(PLAYERS.flatMap(p=>p.teams))];
 
 /* ---------------- INIT ---------------- */
@@ -227,7 +181,7 @@ init();
 function empty(){return{w:0,d:0};}
 function pts(s){return s.w+s.d*0.5;}
 
-/* ---------------- ADD MATCH ---------------- */
+/* ---------------- ADD ---------------- */
 
 function addMatch(){
   const home=homeSel().value;
@@ -246,8 +200,42 @@ function addMatch(){
   render();
 }
 
-function homeSel(){return document.getElementById("home");}
-function awaySel(){return document.getElementById("away");}
+/* ---------------- UNDO ---------------- */
+
+function undoLast(){
+  if(matches.length===0) return alert("No matches");
+
+  const last=matches.pop();
+  history.push(last);
+
+  localStorage.setItem("matches",JSON.stringify(matches));
+  render();
+}
+
+/* ---------------- EDIT ---------------- */
+
+function editMatch(i){
+  const m=matches[i];
+
+  const home=prompt("Home team",m.home);
+  const away=prompt("Away team",m.away);
+  const hg=prompt("Home goals",m.hg);
+  const ag=prompt("Away goals",m.ag);
+
+  if(!home||!away) return;
+
+  matches[i]={home,away,hg:+hg,ag:+ag};
+  localStorage.setItem("matches",JSON.stringify(matches));
+  render();
+}
+
+/* ---------------- DELETE ---------------- */
+
+function deleteMatch(i){
+  matches.splice(i,1);
+  localStorage.setItem("matches",JSON.stringify(matches));
+  render();
+}
 
 /* ---------------- BUILD ---------------- */
 
@@ -267,7 +255,7 @@ function build(){
   return t;
 }
 
-/* ---------------- RENDER (FIFA STYLE) ---------------- */
+/* ---------------- RENDER ---------------- */
 
 function render(){
   const t=build();
@@ -279,11 +267,27 @@ function render(){
 
   document.getElementById("board").innerHTML=
     board.map((p,i)=>`
-      <div class="player">
-        <div class="name">${i===0?"🏆 ":""}${p.name}</div>
-        <div class="score">${p.total.toFixed(1)}</div>
+      <div class="row">
+        <div>${i===0?"🏆 ":""}${p.name}</div>
+        <div style="color:#c8a84b;font-weight:900">${p.total.toFixed(1)}</div>
       </div>
-    `).join("");
+    `).join("") +
+
+    `<div class="card">
+      <h3>📋 Match History</h3>
+
+      ${matches.map((m,i)=>`
+        <div style="display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid #1e2d4a;font-size:12px;">
+          <span>${m.home} ${m.hg}-${m.ag} ${m.away}</span>
+
+          <div style="display:flex;gap:6px;">
+            <button onclick="editMatch(${i})" style="padding:4px 6px;font-size:10px;background:#c8a84b;color:black;">Edit</button>
+            <button onclick="deleteMatch(${i})" style="padding:4px 6px;font-size:10px;background:#e07a5e;">X</button>
+          </div>
+        </div>
+      `).join("")}
+
+    </div>`;
 }
 
 /* ---------------- NAV ---------------- */
@@ -295,6 +299,9 @@ function nav(page,el){
   document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
   el.classList.add("active");
 }
+
+function homeSel(){return document.getElementById("home");}
+function awaySel(){return document.getElementById("away");}
 
 </script>
 
